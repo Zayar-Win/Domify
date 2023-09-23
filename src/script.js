@@ -77,11 +77,20 @@ function walkDom(el,callback){
   }
 }
 
+function refreshDom(){
+  walkDom(root,(el) => {
+    if(el.hasAttribute('x-text')){
+      let expression = el.getAttribute('x-text');
+      el.innerText = data[`${expression}`];
+    }
+  })
+}
+
 function observe(data){
   return new Proxy(data,{
     set(target,key,newValue,receiver){
       target[key] = newValue;
-      // refreshDom()
+      refreshDom()
     }
   })
 }
