@@ -8,6 +8,7 @@
   </head>
   <body>
     <div
+      x-data="{name : 'zayarwin'}"
       style="
         display: flex;
         align-items: center;
@@ -16,23 +17,24 @@
       "
     >
       <div x-data="{count : 0}">
-        <button @click="count++">+</button>
+        <button @click="count++" id="button">+</button>
         <button @click="count--">-</button>
+        <button @click="name = 'udpated'">Change Name</button>
         <p x-text="count"></p>
         <div>
-          <span>I am nested</span>
-        </div>
-      </div>
-      <div x-data="{name : 0}">
-        <button @click="count++">+</button>
-        <button @click="count--">-</button>
-        <p x-text="count"></p>
-        <div>
-          <span>I am nested</span>
+          <span x-text="name"></span>
         </div>
       </div>
     </div>
-
+    <div x-data="{count : 0}">
+      <button @click="count++" id="button">+</button>
+      <button @click="count--">-</button>
+      <p x-text="count"></p>
+      <div>
+        <span>I am nested</span>
+      </div>
+    </div>
+    <script src="../src/Directives/Data.js"></script>
     <script src="../src/script.js"></script>
   </body>
 </html>
