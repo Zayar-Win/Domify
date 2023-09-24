@@ -1,96 +1,76 @@
-// const root = document.querySelector("[x-data]");
-// let rawData = getInitialData();
-// let data = observe(rawData);
-// registerEventListeners();
+const root = document.querySelectorAll('[x-data]');
+const rawDatas = getInitialData(root);
+const datas = observe(rawDatas);//to do something when data add or set 
 
-// function registerEventListeners() {
-//   walkDom(root, (el) => {
-//     if (el.hasAttribute("@click")) {
-//       let expression = el.getAttribute("@click");
-//       console.log(eval(`with (data){(${expression})}`));
-//       el.addEventListener("click", () => {
-//         eval(`with (data){(${expression})}`);
-//       });
-//     }
-//   });
-// }
-
-// function observe(data) {
-//   return new Proxy(data, {
-//     set(target, key, value) {
-//       target[key] = value;
-//       refreshDom();
-//     },
-//   });
-// }
-
-// function getInitialData() {
-//   const data = root.getAttribute("x-data");
-//   return eval(`(${data})`)
-// }
-
-// function refreshDom() {
-//   walkDom(root, (el) => {
-//     if (el.hasAttribute("x-text")) {
-//       let expression = el.getAttribute("x-text");
-//       el.innerText = eval(`with(data) {(${expression})}`);
-//     }
-//   });
-// }
-
-// function walkDom(el, callback) {
-//   callback(el);
-
-//   el = el.firstElementChild;
-
-//   while (el) {
-//     walkDom(el, callback);
-//     el = el.nextElementSibling;
-//   }
-// }
-
-const root = document.querySelector('[x-data]');
-const rawData = getInitialData(root);
-const data = observe(rawData);//to do something when data add or set 
-registerEventListeners()
+registerEventListeners();
 
 function registerEventListeners(){
-  walkDom(root,(el) => {
-    let callback = el.getAttribute('@click');
-    el.addEventListener('click',() =>{
-      eval(`with(data){(${callback})}`);
+  let mainRoots = Array.from(root).filter(el => !el.parentNode.hasAttribute('x-data'))
+  mainRoots.forEach((el,i) => (
+    walkDom(el,(el) => {
+      if(el.hasAttribute("@click")){
+        let callback = el.getAttribute('@click');
+        let currentData = datas[i];
+        el.addEventListener('click',() =>{
+          eval(`with(currentData){(${callback})}`);
+          console.log(currentData);
+        })
+      }
     })
-  })
+  ))
 }
 
 function getInitialData(root){
-  let data = root.getAttribute('x-data');
-  return eval(`(${data})`)
+  let datas = [];
+  root.forEach(el => {
+    if(el.hasAttribute('x-data')&& !el.parentNode.hasAttribute('x-data')){
+      let rawData = el.getAttribute('x-data');
+      let data = new Data(eval(`(${rawData})`));
+      el = el.children[0];
+      walkDom(el,(el,data) => {
+        if(el.hasAttribute('x-data')){
+          let rawData = el.getAttribute('x-data');
+           data.addData(eval(`(${rawData})`));
+        }
+      },data)
+      datas.push(data);
+    }
+  })
+  return datas;
 }
 
-function walkDom(el,callback){
-  callback(el);
+function walkDom(el,callback,data){
+  callback(el,data);
   el = el.firstElementChild;
   while(el){
-    walkDom(el,callback);
+    walkDom(el,callback,data);
     el = el.nextElementSibling;
   }
 }
 
 function refreshDom(){
-  walkDom(root,(el) => {
-    if(el.hasAttribute('x-text')){
-      let expression = el.getAttribute('x-text');
-      el.innerText = data[`${expression}`];
-    }
-  })
+  let mainRoots = Array.from(root).filter(el => !el.parentNode.hasAttribute('x-data'))
+  console.log(mainRoots);
+  mainRoots.forEach((el,i) => (
+    walkDom(el,(el) => {
+      if(el.hasAttribute('x-text')) {
+        let expression = el.getAttribute('x-text');
+        console.log(i);
+        el.innerText = datas[i][`${expression}`];
+      }
+    })
+  ))
 }
 
-function observe(data){
-  return new Proxy(data,{
-    set(target,key,newValue,receiver){
-      target[key] = newValue;
-      refreshDom()
-    }
-  })
+function observe(datas){
+  return datas.map(data => 
+    new Proxy(data.data,{
+      set(target,key,newValue,receiver){
+        target[key] = newValue;
+        refreshDom()
+      }
+    })
+    )
 }
+
+refreshDom();
