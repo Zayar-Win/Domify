@@ -16,10 +16,12 @@
         height: 100vh;
       "
     >
-      <div x-data="{count : 0}">
+      <div x-data="{count : 0,open:true}">
         <button @click="count++" id="button">+</button>
         <button @click="count--">-</button>
         <button @click="name = 'udpated'">Change Name</button>
+        <button @click="open = !open">Open</button>
+        <div x-show="open">Contents...</div>
         <p x-text="count"></p>
         <div>
           <span x-text="name"></span>
