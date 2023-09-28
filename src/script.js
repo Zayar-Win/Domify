@@ -1,11 +1,11 @@
 const root = document.querySelectorAll('[x-data]');
+const mainRoots = Array.from(root).filter(el => !el.parentNode.hasAttribute('x-data'))
 const rawDatas = getInitialData(root);
 const datas = observe(rawDatas);//to do something when data add or set 
 
 registerEventListeners();
 
 function registerEventListeners(){
-  let mainRoots = Array.from(root).filter(el => !el.parentNode.hasAttribute('x-data'))
   mainRoots.forEach((el,i) => (
     walkDom(el,(el) => {
       if(el.hasAttribute("@click")){
@@ -49,16 +49,19 @@ function walkDom(el,callback,data){
 }
 
 function refreshDom(){
-  let mainRoots = Array.from(root).filter(el => !el.parentNode.hasAttribute('x-data'))
-  console.log(mainRoots);
   mainRoots.forEach((el,i) => (
     walkDom(el,(el) => {
       if(el.hasAttribute('x-text')) {
         let expression = el.getAttribute('x-text');
-        console.log(i);
         el.innerText = datas[i][`${expression}`];
       }
+      if(el.hasAttribute('x-show')){
+        let expression = el.getAttribute('x-show');
+        let showOrNot = datas[i][`${expression}`];
+        el.style.display = showOrNot ? 'block' : 'none';
+      }
     })
+    
   ))
 }
 
